@@ -16,37 +16,6 @@ options are explained well and you should be able to easily configure the script
 if anything goes wrong or if you have questions about the configuration of the script. 
 --]]
 
-Config.UpdateCheck = true -- Checks for updates on resource startup
-
---[[ Database Integration
-This script has features that require a SQL database to be connected to the server using oxmysql. If that is
-not installed or if you do not wish to use a database those features will be disabled automatically. If you have
-any issues setting up the database, please contact me.
-
-!! IMPORTANT: TO ENABLE SQL INTEGRATION, MODIFY THE FXMANIFEST AND UNCOMMENT THE OXMYSQL SCRIPT IMPORT !!
---]]
-
-Config.EnableSQL = false -- Enable SQL integration
-
---[[ Framework Integration
-This script is standalone out of the box, but you can modify these variables to integrate it with your
-framework. Do not mess with this if you do not know what you are doing.
---]]
-
-Config.Notification = function(message)
-    TriggerEvent('chat:addMessage', {
-        color = { 255, 0, 0 },
-        multiline = true,
-        args = { 'null_offroad', message }
-    })
-end
-
---[[ Script Specific
-In this section you configure variables that will change the way that the script works, some of these might
-seem confusing. If that is the case do not hesitate to contact me so I can help you properly configure the script
-to your wishes.
---]]
-
 -- Example: Config.BypassVehicles = { 'adder', 'tezeract' }: will bypass the class check.
 Config.BypassVehicles = {}
 
@@ -56,29 +25,44 @@ Config.BypassVehicleClasses = { 9 }
 -- Material types that should not cause any grip loss. You can find these numbers in the debugger.
 Config.Roads = { 1, 4, 3, 7, 181, 15, 13, 55, 68, 69, 12, 31, 36, 35, 173, 64 }
 
--- This will multiply the intensity of the effect that is applied when a vehicle goes off-road. The default is 1 for none.
--- The effect of this variable can be pretty big, and there are also max values from where it will completely break. 
--- Properly test your configuration!
-Config.IntensityMultiplier = 1
+Config.ClassMod = {
+    [0]= 1.31, -- Compacts 
+    [1] = 1.21, --Sedans
+    [2] = 1.01, --SUVs
+    [3] = 2.51, --Coupes
+    [4] = 2.201, --Muscle
+    [5] = 2.81, --Sports Classics
+    [6] = 2.51, --Sports
+    [7] = 3.51, --Super  
+    [8] = 1.51, --Motorcycles  
+    [9] = 0, --Off-road
+    [10] = 0, --Industrial
+    [11] = 0, --Utility
+    [12] = 5.21, --Vans  
+    [13] = 0, --Cycles  
+    [14] = 0, --Boats  
+    [15] = 0, --Helicopters  
+    [16] = 0, --Planes  
+    [17] = 0, --Service  
+    [18] = 0.21, --Emergency  
+    [19] = 0, --Military  
+    [20] = 0.21, --Commercial  
+    [21] = 0 --Trains  
+}
 
---[[ Language Settings
-Change the values of the items below to modify the text and messages that the script is using.
---]]
-
-Config.Language = {
-    ['command_usage'] = "Check if the current vehicle is added to the offroad list, or add/remove it from the list.",
-    ['command_param_action_nosql'] = "debug: toggle debugging mode. (optional)",
-    ['command_param_action_sql'] = "add|remove|debug: do you want to add or remove the current vehicle? Debug will toggle debugging mode. (optional)",
-    ['command_param_comment'] = "Do you want to add a comment in the database? (optional, action 'add' required)",
-
-    ['command_default_comment'] = "No comment",
-    ['command_vehicle_removed'] = "Vehicle has been removed from the list.",
-    ['command_vehicle_added'] = "Vehicle has been added to the list.",
-    ['command_vehicle_already_added'] = "Vehicle already on the list.",
-    ['command_vehicle_not_on_list'] = "Vehicle is not on the list.",
-    ['command_vehicle_in_config'] = "Vehicle has to be removed from the configuration.",
-    ['command_vehicle_not_found'] = "Unable to detect a vehicle.",
-    ['command_unexpected_param'] = "Unexpected parameter found at the first argument.",
-    ['command_vehicle_on_list'] = "Vehicle is on the list",
-
+Config.WheelMod = {
+	[-1] = 1.91, --Stock
+    [0] = 1.31, --Sport 
+    [1] = 2.00, --Muscle
+    [2] = 1.81, --Lowrider
+    [3] = 0.50, --SUV
+    [4] = -1.001, --Offroad
+    [5] = 1.75, --Tuner
+    [6] = 1.61, --Bike Wheels
+    [7] = 1.91, --High Eend  
+    [8] = 1.21, --Bennys Original  
+    [9] = 0, --Bennys Bespoke 
+    [10] = 0, --Open Wheel
+    [11] = 0, --Street
+    [12] = 2.21, --Track  
 }

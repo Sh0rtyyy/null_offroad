@@ -11,10 +11,6 @@ shared_scripts {
 	'shared/*.lua'
 }
 
-server_scripts {
-	-- '@oxmysql/lib/MySQL.lua', -- Uncomment this line if you have Config.EnableSQL enabled.
-	'server/*.lua'
-}
 client_script 'client/*.lua'
 
 dependencies {

@@ -1,12 +1,6 @@
 local playerPed, playerVehicle, playerDriver, vehicleClass, vehicleModel, surfaceMaterial = nil, nil, nil, nil, nil, nil
 local offroadVehicles = {}
 
-AddEventHandler('onResourceStart', function(resName)
-	if resourceName == resName then
-		TriggerServerEvent(serverEvent('requestUpdate'))
-	end
-end)
-
 RegisterNetEvent(clientEvent('receiveUpdate'), function(vehicleList)
 	offroadVehicles = vehicleList
 end)
@@ -15,9 +9,51 @@ RegisterNetEvent(clientEvent('toggleDebug'), function()
 	LocalPlayer.state:set('debuggingOffroad', not LocalPlayer.state['debuggingOffroad'])
 end)
 
-RegisterNetEvent(clientEvent('showNotification'), function(message)
-	Config.Notification(message)
-end)
+
+--[[local Config.ClassMod = {
+    [0]= 1.31, -- Compacts 
+    [1] = 1.21, --Sedans
+    [2] = 1.01, --SUVs
+    [3] = 2.51, --Coupes
+    [4] = 2.201, --Muscle
+    [5] = 2.81, --Sports Classics
+    [6] = 2.51, --Sports
+    [7] = 3.51, --Super  
+    [8] = 1.51, --Motorcycles  
+    [9] = 0, --Off-road
+    [10] = 0, --Industrial
+    [11] = 0, --Utility
+    [12] = 5.21, --Vans  
+    [13] = 0, --Cycles  
+    [14] = 0, --Boats  
+    [15] = 0, --Helicopters  
+    [16] = 0, --Planes  
+    [17] = 0, --Service  
+    [18] = 0.21, --Emergency  
+    [19] = 0, --Military  
+    [20] = 0.21, --Commercial  
+    [21] = 0 --Trains  
+}]]
+
+--[[local Config.WheelMod = {
+	[-1] = 1.91, --Stock
+    [0] = 1.31, --Sport 
+    [1] = 2.00, --Muscle
+    [2] = 1.81, --Lowrider
+    [3] = 0.50, --SUV
+    [4] = -1.001, --Offroad
+    [5] = 1.75, --Tuner
+    [6] = 1.61, --Bike Wheels
+    [7] = 1.91, --High Eend  
+    [8] = 1.21, --Bennys Original  
+    [9] = 0, --Bennys Bespoke 
+    [10] = 0, --Open Wheel
+    [11] = 0, --Street
+    [12] = 2.21, --Track  
+}]]
+
+local class = nil
+local wheelflag = nil
 
 CreateThread(function()
 	while true do
@@ -25,6 +61,8 @@ CreateThread(function()
 
 		-- Is player in any vehicle?
 		if IsPedInAnyVehicle(playerPed, false) and playerDriver then
+			class = GetVehicleClass(playerVehicle)
+			wheelflag = GetVehicleWheelType(playerVehicle)
 			if InTable(Config.Roads, surfaceMaterial) then
 				-- Check if the slippery should go away
 				if Entity(playerVehicle).state['noGrip'] and DoesEntityExist(playerVehicle) then
@@ -43,7 +81,7 @@ CreateThread(function()
 
 					Wait(100)
 				else
-					Wait(500)
+					Wait(100)
 				end
 			else
 				if not (InTable(Config.BypassVehicleClasses, vehicleClass) or InTable(offroadVehicles, vehicleModel)) and
@@ -61,11 +99,11 @@ CreateThread(function()
 					Entity(playerVehicle).state:set('defaultTractionLoss', defaultTractionLoss)
 
 					SetVehicleHandlingFloat(playerVehicle, 'CHandlingData', 'fTractionCurveMax',
-						defaultCurveMax - (1.2 * Config.IntensityMultiplier))
+						defaultCurveMax - Config.ClassMod[class] / 4 * Config.WheelMod[wheelflag])
 					SetVehicleHandlingFloat(playerVehicle, 'CHandlingData', 'fTractionCurveMin',
-						defaultCurveMin - (1.1 * Config.IntensityMultiplier))
+						defaultCurveMin - Config.ClassMod[class] / 4 * Config.WheelMod[wheelflag])
 					SetVehicleHandlingFloat(playerVehicle, 'CHandlingData', 'fLowSpeedTractionLossMult',
-						defaultTractionLoss + (1.0 * Config.IntensityMultiplier))
+						defaultTractionLoss + Config.ClassMod[class] * Config.WheelMod[wheelflag])
 
 					ModifyVehicleTopSpeed(playerVehicle, 1.0)
 
@@ -74,7 +112,7 @@ CreateThread(function()
 					Wait(100)
 				else
 					-- Do not apply effect, let thread sleep
-					Wait(500)
+					Wait(100)
 				end
 			end
 		else
@@ -96,41 +134,3 @@ CreateThread(function()
 		surfaceMaterial = (playerVehicle and playerVehicle ~= 0) and GetVehicleWheelSurfaceMaterial(playerVehicle, 1) or nil
 	end
 end)
-
-CreateThread(function()
-	while true do
-		Wait(0)
-
-		if LocalPlayer.state['debuggingOffroad'] then
-			playerVehicle = GetVehiclePedIsIn(playerPed, false)
-			surfaceMaterial = (playerVehicle and playerVehicle ~= 0) and GetVehicleWheelSurfaceMaterial(playerVehicle, 1) or nil
-
-			if playerVehicle and surfaceMaterial then
-				SetTextScale(0.65, 0.65)
-				SetTextFont(4)
-				SetTextProportional(1)
-				SetTextCentre(true)
-				SetTextColour(255, 255, 255, 200)
-
-				AddTextEntry('debuggingOffroad', ('Currently ' ..
-					(InTable(Config.Roads, surfaceMaterial) and 'ON' or 'OFF') ..
-					' road, type: ' ..
-					surfaceMaterial .. ', effect: ' .. tostring(Entity(playerVehicle).state['noGrip'] and 'ON' or 'OFF')))
-				BeginTextCommandDisplayText('debuggingOffroad')
-				EndTextCommandDisplayText(0.5, 0.85)
-			end
-		else
-			Wait(5000)
-		end
-	end
-end)
-
-TriggerEvent('chat:addSuggestion', '/offroad',
-	Config.Language.command_usage, {
-	{ name = "action",
-		help = Config.EnableSQL and
-			Config.Language.command_param_action_sql or
-			Config.Language.command_param_action_nosql },
-	Config.EnableSQL and
-		{ name = "comment", help = Config.Language.command_param_comment } or nil
-})
